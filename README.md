@@ -1,6 +1,6 @@
 # Chat Application implementing the Merkle-Hellman Knapsack Cryptosystem (with Solitaire Stream Cypher)
 
-- **Note**: the listed commands work on UNIX systems. For Windows, check the equivalents (`python3`, `source`, etc.).
+- **Note**: the listed commands (`python3`, `source`, etc.) work on UNIX systems. For Windows, check the equivalents.
 
 ## Prerequisites
 
