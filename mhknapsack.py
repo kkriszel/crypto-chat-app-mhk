@@ -64,7 +64,7 @@ class MHKnapsack:
         2. For each byte, determine the 8 bits (the `a_i`s) using `utils.byte_to_bits`
         3. Encrypt the 8 message bits by computing
             c = sum of a_i * b_i for i = 1 to n
-        4. Return a list of the encrypted ciphertexts for each chunk in the message
+        4. Return a list of the encrypted cyphertexts for each chunk in the message
 
         Hint: think about using `zip` at some point
 

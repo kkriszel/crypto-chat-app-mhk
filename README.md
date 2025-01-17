@@ -1,11 +1,15 @@
-# Lab3: Knapsack + Solitaire PKI
+# Chat Application implementing the Merkle-Hellman Knapsack Cryptosystem (with Solitaire Stream Cypher)
+
+- **Note**: the listed commands work on UNIX systems. For Windows, check the equivalents (`python3`, `source`, etc.).
 
 ## Prerequisites
+
+- **Note**: the application was written in and tested with `python v3.12`.
 
 - Create a virtual environment:
 
 ```shell
-> python -m venv venv
+> python3 -m venv venv
 ```
 
 - Source the virtual environment:
@@ -17,39 +21,29 @@
 - Install the dependencies:
 
 ```shell
-> python -m pip install -r requirements.txt
+> python3 -m pip install -r requirements.txt
 ```
-
-- Note: the application was written in and tested with `python v3.12`.
 
 ## Running the keyserver
 
 ```shell
-> python keyserver.py
+> python3 keyserver.py
 ```
 
 - The keyserver listens on <localhost:9000>.
-
-## Add the keyserver to `/etc/hosts`
-
-- Edit your `/etc/hosts` to include the following line:
-
-```plain
-127.0.0.1   key-server
-```
 
 ## Running the client(s)
 
 - To start a client in listening mode:
 
 ```shell
-> python client.py <port>
+> python3 client.py <port>
 ```
 
 - To start a client which connects to a peer on startup:
 
 ```shell
-> python client.py <port> <peer_port>
+> python3 client.py <port> <peer_port>
 ```
 
 ## Testing
@@ -62,7 +56,7 @@
 - To run a test suite:
 
 ```shell
-> python <test_file>
+> python3 <test_file>
 ```
 
 - The `test_keyserver.py` suite assumes a running keyserver.

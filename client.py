@@ -6,10 +6,10 @@ import structlog
 from logging import Logger
 import sys
 import random
-from cyphers import StreamCipher, SolitaireKeyStream
+from cyphers import StreamCypher, SolitaireKeyStream
 
 class Client:
-    KEYSERVER_ADDRESS = ('key-server', 9000)
+    KEYSERVER_ADDRESS = ('localhost', 9000)
 
     client_id: int
     private_key: tuple[tuple[int, ...], int, int]
@@ -24,7 +24,7 @@ class Client:
     half_key: int | None
     peer_half_key: int | None
     common_key: list[int] | None
-    stream_cipher: StreamCipher | None
+    stream_cypher: StreamCypher | None
 
     def __init__(self, client_id: int, peer_id: int | None=None) -> None:
         self.client_id = client_id
@@ -37,7 +37,7 @@ class Client:
         self.half_key = None
         self.peer_half_key = None
         self.common_key = None
-        self.stream_cipher = None
+        self.stream_cypher = None
 
     def start(self) -> None:
         try:
@@ -47,7 +47,7 @@ class Client:
             self._generate_half_key()
             self._exchange_half_keys()
             self._generate_common_key()
-            self._init_stream_cipher()
+            self._init_stream_cypher()
             self._message_loop()
         except Exception as e:
             self.logger.error(f'Error in base: {e}')
@@ -109,10 +109,10 @@ class Client:
 
         self.logger.info('Generated common key:', key=self.common_key)
 
-    def _init_stream_cipher(self) -> None:
+    def _init_stream_cypher(self) -> None:
         key_stream = SolitaireKeyStream(self.common_key)
-        self.stream_cipher = StreamCipher(key_stream)
-        self.logger.info('Stream cipher initialized')
+        self.stream_cypher = StreamCypher(key_stream)
+        self.logger.info('Stream cypher initialized')
 
     def _message_loop(self) -> None:
         self.logger.info('Starting message loop. To stop, type \'exit\' in your round.')
@@ -339,11 +339,11 @@ class Client:
     def _to_encrypted_bytes_sks(self, msg: dict) -> bytes:
         msg_json_str = json.dumps(msg)
         msg_json_bytes = msg_json_str.encode()
-        msg_json_encrypted = self.stream_cipher.encode(msg_json_bytes)
+        msg_json_encrypted = self.stream_cypher.encode(msg_json_bytes)
         return msg_json_encrypted
 
     def _from_encrypted_bytes_sks(self, msg: bytes) -> dict:
-        msg_json_bytes = self.stream_cipher.decode(msg)
+        msg_json_bytes = self.stream_cypher.decode(msg)
         msg_json_str = msg_json_bytes.decode()
         msg_json = json.loads(msg_json_str)
         return msg_json

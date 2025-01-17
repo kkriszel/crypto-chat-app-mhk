@@ -79,7 +79,7 @@ class SolitaireKeyStream:
 
         return self.deck[top_value]
 
-class StreamCipher:
+class StreamCypher:
     key_stream: SolitaireKeyStream
 
     def __init__(self, key_stream: SolitaireKeyStream) -> None:

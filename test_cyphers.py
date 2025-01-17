@@ -1,7 +1,7 @@
 import unittest
 
 import random
-from cyphers import SolitaireKeyStream, StreamCipher
+from cyphers import SolitaireKeyStream, StreamCypher
 
 class TestSolitaireKeyStream(unittest.TestCase):
     def test_init_with_default_deck(self):
@@ -46,17 +46,17 @@ class TestSolitaireKeyStream(unittest.TestCase):
         self.assertGreaterEqual(byte, 0)
         self.assertLessEqual(byte, 255)
 
-class TestStreamCipher(unittest.TestCase):
+class TestStreamCypher(unittest.TestCase):
     def test_encode_decode_default_deck(self):
         key_stream1 = SolitaireKeyStream()
         key_stream2 = SolitaireKeyStream()
 
-        stream_cipher1 = StreamCipher(key_stream1)
-        stream_cipher2 = StreamCipher(key_stream2)
+        stream_cypher1 = StreamCypher(key_stream1)
+        stream_cypher2 = StreamCypher(key_stream2)
 
         input_data = b'I Love Python!'
-        encoded_data = stream_cipher1.encode(input_data)
-        decoded_data = stream_cipher2.decode(encoded_data)
+        encoded_data = stream_cypher1.encode(input_data)
+        decoded_data = stream_cypher2.decode(encoded_data)
 
         self.assertEqual(input_data, decoded_data)
 
@@ -70,12 +70,12 @@ class TestStreamCipher(unittest.TestCase):
         key_stream1 = SolitaireKeyStream(deck1)
         key_stream2 = SolitaireKeyStream(deck2)
 
-        stream_cipher1 = StreamCipher(key_stream1)
-        stream_cipher2 = StreamCipher(key_stream2)
+        stream_cypher1 = StreamCypher(key_stream1)
+        stream_cypher2 = StreamCypher(key_stream2)
 
         input_data = b'I Love Python!'
-        encoded_data = stream_cipher1.encode(input_data)
-        decoded_data = stream_cipher2.decode(encoded_data)
+        encoded_data = stream_cypher1.encode(input_data)
+        decoded_data = stream_cypher2.decode(encoded_data)
 
         self.assertEqual(input_data, decoded_data)
 
@@ -83,12 +83,12 @@ class TestStreamCipher(unittest.TestCase):
         key_stream1 = SolitaireKeyStream()
         key_stream2 = SolitaireKeyStream()
 
-        stream_cipher1 = StreamCipher(key_stream1)
-        stream_cipher2 = StreamCipher(key_stream2)
+        stream_cypher1 = StreamCypher(key_stream1)
+        stream_cypher2 = StreamCypher(key_stream2)
 
         input_data = '👋🤑🐮🚝🎼🇺🇲'.encode()
-        encoded_data = stream_cipher1.encode(input_data)
-        decoded_data = stream_cipher2.decode(encoded_data)
+        encoded_data = stream_cypher1.encode(input_data)
+        decoded_data = stream_cypher2.decode(encoded_data)
 
         self.assertEqual(input_data, decoded_data)
 
