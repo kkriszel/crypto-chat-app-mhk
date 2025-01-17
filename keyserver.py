@@ -12,10 +12,16 @@ class KeyServer:
     SERVER_ADDR = ('localhost', 9000)
 
     def __init__(self) -> None:
+        """
+        Initialize the KeyServer instance.
+        """
         self.public_keys = {}
         self.logger = structlog.get_logger()
 
     def start(self) -> None:
+        """
+        Start the key server to listen for incoming client connections and handle their requests.
+        """
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
                 try:
@@ -49,7 +55,16 @@ class KeyServer:
         except KeyboardInterrupt:
             self.logger.info('Server interrupted by user')
 
-    def _handle_request(self, request: dict):
+    def _handle_request(self, request: dict) -> dict:
+        """
+        Handle incoming requests from clients.
+
+        Args:
+            request (dict): The request received from a client.
+
+        Returns:
+            dict: The response to be sent back to the client.
+        """
         request_type = request.get('type')
 
         if request_type == 'register':
@@ -61,6 +76,15 @@ class KeyServer:
             return {'status': 'error', 'message': 'Invalid request type'}
 
     def _handle_register_request(self, request: dict) -> dict:
+        """
+        Handle a public key registration request from a client.
+
+        Args:
+            request (dict): The registration request containing the client ID and public key.
+
+        Returns:
+            dict: The response indicating the success or failure of the registration.
+        """
         client_id = request.get('client_id')
         public_key = request.get('public_key')
 
@@ -77,6 +101,15 @@ class KeyServer:
             return {'status': 'error', 'message': 'Invalid register request'}
 
     def _handle_retrieve_request(self, request: dict) -> dict:
+        """
+        Handle a public key retrieval request from a client.
+
+        Args:
+            request (dict): The retrieval request containing the client ID.
+
+        Returns:
+            dict: The response containing the public key or an error message.
+        """
         client_id = request.get('client_id')
 
         if not client_id:

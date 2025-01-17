@@ -27,6 +27,13 @@ class Client:
     stream_cypher: StreamCypher | None
 
     def __init__(self, client_id: int, peer_id: int | None=None) -> None:
+        """
+        Initialize the Client instance.
+
+        Args:
+            client_id (int): The ID of the client.
+            peer_id (int, optional): The ID of the peer client. Defaults to None.
+        """
         self.client_id = client_id
         self.logger = structlog.get_logger()
         self.own_socket = None
@@ -40,6 +47,10 @@ class Client:
         self.stream_cypher = None
 
     def start(self) -> None:
+        """
+        Start the client operations including key generation, registration, peer connection,
+        key exchange, and message loop.
+        """
         try:
             self._generate_key_pair()
             self._register_public_key()
@@ -55,10 +66,16 @@ class Client:
             self._cleanup()
 
     def _generate_key_pair(self) -> None:
+        """
+        Generate a private and public key pair using the MHKnapsack algorithm.
+        """
         self.private_key = MHKnapsack.generate_private_key()
         self.public_key = MHKnapsack.create_public_key(self.private_key)
 
     def _register_public_key(self) -> None:
+        """
+        Register the client's public key with the key server.
+        """
         request = {
             'type': 'register',
             'client_id': self.client_id,
@@ -80,6 +97,9 @@ class Client:
         self.logger.info('Public key registering response:', response=response)
 
     def _peer(self) -> None:
+        """
+        Attempt to connect to a peer client. If no peer ID is provided, listen for incoming connections.
+        """
         if not self.peer_id:
             listen_success = self._try_listen()
 
@@ -89,10 +109,16 @@ class Client:
         self._try_connect()
 
     def _generate_half_key(self) -> None:
+        """
+        Generate a random half key for the key exchange process.
+        """
         self.half_key = random.randint(10000, 9999999)
         self.logger.info('Generated own half key:', half_key=self.half_key)
 
     def _exchange_half_keys(self) -> None:
+        """
+        Exchange half keys with the peer client to generate a common key.
+        """
         if self.should_start:
             self._send_own_half_key()
             self._receive_peer_half_key()
@@ -101,6 +127,9 @@ class Client:
             self._send_own_half_key()
 
     def _generate_common_key(self) -> None:
+        """
+        Generate a common key using the exchanged half keys.
+        """
         common_key = self.half_key * self.peer_half_key
         random.seed(common_key)
 
@@ -110,11 +139,17 @@ class Client:
         self.logger.info('Generated common key:', key=self.common_key)
 
     def _init_stream_cypher(self) -> None:
+        """
+        Initialize the stream cypher using the generated common key.
+        """
         key_stream = SolitaireKeyStream(self.common_key)
         self.stream_cypher = StreamCypher(key_stream)
         self.logger.info('Stream cypher initialized')
 
     def _message_loop(self) -> None:
+        """
+        Start the message loop for sending and receiving messages with the peer client.
+        """
         self.logger.info('Starting message loop. To stop, type \'exit\' in your round.')
 
         try:
@@ -130,6 +165,9 @@ class Client:
         self.logger.info('Messaging over. Goodbye!')
 
     def _send_message(self) -> None:
+        """
+        Send an encrypted message to the peer client.
+        """
         msg_input = input('>  You: ')
 
         should_finish = msg_input == 'exit'
@@ -148,6 +186,9 @@ class Client:
             raise InterruptedError
 
     def _receive_message(self) -> None:
+        """
+        Receive and decrypt a message from the peer client.
+        """
         print('> Peer: ', end='', flush=True)
 
         try:
@@ -166,12 +207,21 @@ class Client:
         print(msg.get('message'))
 
     def _cleanup(self) -> None:
+        """
+        Clean up resources by closing the sockets.
+        """
         if self.own_socket:
             self.own_socket.close()
         if self.peer_socket:
             self.peer_socket.close()
 
     def _try_listen(self) -> bool:
+        """
+        Attempt to listen for incoming connections from a peer client.
+
+        Returns:
+            bool: True if a peer connection is successfully accepted, False otherwise.
+        """
         self.own_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.own_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -225,6 +275,9 @@ class Client:
                 self.own_socket.close()
 
     def _try_connect(self) -> None:
+        """
+        Attempt to connect to a peer client using the provided peer ID.
+        """
         if not self.peer_id:
             peer_id = None
             while not peer_id and peer_id == self.peer_id:
@@ -268,6 +321,9 @@ class Client:
                 self.peer_socket.close()
 
     def _retrieve_peer_public_key(self) -> None:
+        """
+        Retrieve the public key of the peer client from the key server.
+        """
         request = {
             'type': 'retrieve',
             'client_id': self.peer_id,
@@ -289,6 +345,15 @@ class Client:
         self.peer_public_key = tuple(response.get('public_key'))
 
     def _communicate_keyserver(self, request: dict) -> dict:
+        """
+        Communicate with the key server to send a request and receive a response.
+
+        Args:
+            request (dict): The request to send to the key server.
+
+        Returns:
+            dict: The response from the key server.
+        """
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as so:
                 so.connect(self.KEYSERVER_ADDRESS)
@@ -300,6 +365,9 @@ class Client:
             raise RuntimeError(e)
 
     def _send_own_half_key(self) -> None:
+        """
+        Send the client's half key to the peer client.
+        """
         try:
             msg = {'half_key': self.half_key}
             msg_data = self._to_encrypted_bytes_mhk(msg, self.peer_public_key)
@@ -311,6 +379,9 @@ class Client:
             sys.exit(1)
 
     def _receive_peer_half_key(self) -> None:
+        """
+        Receive the peer client's half key.
+        """
         try:
             msg_data = self.peer_socket.recv(1024)
             msg = self._from_encrypted_bytes_mhk(msg_data, self.private_key)
@@ -321,6 +392,16 @@ class Client:
             sys.exit(1)
 
     def _to_encrypted_bytes_mhk(self, msg: dict, public_key: tuple[int, ...]) -> bytes:
+        """
+        Encrypt a message using the MHKnapsack algorithm and convert it to bytes.
+
+        Args:
+            msg (dict): The message to encrypt.
+            public_key (tuple[int, ...]): The public key for encryption.
+
+        Returns:
+            bytes: The encrypted message in bytes.
+        """
         msg_json_str = json.dumps(msg)
         msg_json_bytes = msg_json_str.encode()
         msg_json_encrypted = MHKnapsack.encrypt(msg_json_bytes, public_key)
@@ -329,6 +410,16 @@ class Client:
         return msg_json_encrypted_json_bytes
 
     def _from_encrypted_bytes_mhk(self, msg: bytes, private_key: tuple[tuple[int, ...], int, int]) -> dict:
+        """
+        Decrypt a message using the MHKnapsack algorithm from bytes.
+
+        Args:
+            msg (bytes): The encrypted message in bytes.
+            private_key (tuple[tuple[int, ...], int, int]): The private key for decryption.
+
+        Returns:
+            dict: The decrypted message.
+        """
         msg_json_encrypted_json_str = msg.decode()
         msg_json_encrypted = json.loads(msg_json_encrypted_json_str)
         msg_json_bytes = MHKnapsack.decrypt(msg_json_encrypted, private_key)
@@ -337,12 +428,30 @@ class Client:
         return msg_json
 
     def _to_encrypted_bytes_sks(self, msg: dict) -> bytes:
+        """
+        Encrypt a message using the stream cypher and convert it to bytes.
+
+        Args:
+            msg (dict): The message to encrypt.
+
+        Returns:
+            bytes: The encrypted message in bytes.
+        """
         msg_json_str = json.dumps(msg)
         msg_json_bytes = msg_json_str.encode()
         msg_json_encrypted = self.stream_cypher.encode(msg_json_bytes)
         return msg_json_encrypted
 
     def _from_encrypted_bytes_sks(self, msg: bytes) -> dict:
+        """
+        Decrypt a message using the stream cypher from bytes.
+
+        Args:
+            msg (bytes): The encrypted message in bytes.
+
+        Returns:
+            dict: The decrypted message.
+        """
         msg_json_bytes = self.stream_cypher.decode(msg)
         msg_json_str = msg_json_bytes.decode()
         msg_json = json.loads(msg_json_str)
