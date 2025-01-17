@@ -152,3 +152,7 @@ The Solitaire Stream Cypher is a symmetric key stream cypher that uses a deck of
     - The clients enter a message loop where they alternately send and receive encrypted messages.
     - Messages are encrypted using the Solitaire Stream Cypher and decrypted by the receiving client.
     - The clients need to keep track of the Stream Cypher based on both their own message and the peer's message; the i'th bit of the Stream Cypher needs to match in both clients at all times.
+
+## Demo
+
+![demo](demo.png)
