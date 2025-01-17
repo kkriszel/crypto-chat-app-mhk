@@ -71,7 +71,7 @@
 
 ### Overview
 
-This project is a chat application that implements the Merkle-Hellman Knapsack Cryptosystem and the Solitaire Stream Cypher for secure communication between clients. The application consists of several components, including a key server, clients, and utility functions for cryptographic operations.
+This project is a chat application that implements the Merkle-Hellman Knapsack Cryptosystem and the Solitaire Stream Cypher for secure communication between clients.
 
 ### Components
 
@@ -133,7 +133,7 @@ The Solitaire Stream Cypher is a symmetric key stream cypher that uses a deck of
     - The key server stores the public key and responds with a success message.
 
 2. **Retrieve Public Key**:
-    - The client sends a request to the key server to retrieve the public key of a peer.
+    - The client sends a request to the key server to retrieve the public key of a peer by its ID.
     - The key server responds with the public key of the requested peer.
 
 #### Client Communication
@@ -143,9 +143,12 @@ The Solitaire Stream Cypher is a symmetric key stream cypher that uses a deck of
     - The clients exchange initial handshake messages to establish a connection.
 
 2. **Half Key Exchange**:
-    - The clients generate and exchange half keys.
-    - The half keys are combined to generate a common key, which is used to initialize the Solitaire Stream Cypher.
+    - The clients generate their own half keys. These are big, random numbers.
+    - Next, they exchange these between themselves. The exchange happens with the Merkle-Hellman system.
+    - The half keys are combined to generate a common key, by multiplying them together.
+    - The common key is used to initialize the Solitaire Stream Cypher.
 
 3. **Message Exchange**:
     - The clients enter a message loop where they alternately send and receive encrypted messages.
     - Messages are encrypted using the Solitaire Stream Cypher and decrypted by the receiving client.
+    - The clients need to keep track of the Stream Cypher based on both their own message and the peer's message; the i'th bit of the Stream Cypher needs to match in both clients at all times.
